@@ -21,7 +21,16 @@ public class repeatFamily {
 	private float avgInsBP=0;
 	private float maxInsBP=0;
 	private float minInsBP=Float.MAX_VALUE;
+	
+	private int minSize=Integer.MAX_VALUE;
+	private int maxSize=0;
+	private int avgSize=0;
 
+	private int countComp=0;
+	
+	private float avgRelPos=0;
+	private int minRelPos=Integer.MAX_VALUE;
+	private int maxRelPos=0;
 
 	public repeatFamily() {
 		
@@ -71,6 +80,24 @@ public class repeatFamily {
 		if (newVal>maxInsBP) maxInsBP=newVal;
 	}
 	
+	public void updateSize(int newVal){
+		int previousElementCount = elementIDs.size()-1;
+		avgSize = ((avgSize*previousElementCount) + newVal) / elementIDs.size();
+		if (newVal<minSize) minSize=newVal;
+		if (newVal>maxSize) maxSize=newVal;
+	}
+	
+	public void updateComp(int newVal) {
+		countComp += newVal;
+	}
+	
+	public void updateRelPos(float newVal) {
+		int previousElementCount = elementIDs.size()-1;
+		avgRelPos = ((avgRelPos * previousElementCount) + newVal) / (float) elementIDs.size();
+		if (newVal<minRelPos) minRelPos = (int) newVal;
+		if (newVal>maxRelPos) maxRelPos =(int) newVal;
+	}
+	
 	public float getAvgSWScore() {
 	    return avgSWScore;
 	}
@@ -117,6 +144,34 @@ public class repeatFamily {
 
 	public float getMinInsBP() {
 	    return minInsBP;
+	}
+	
+	public int getAvgSize() {
+		return avgSize;
+	}
+	
+	public int getAMinSize() {
+		return minSize;
+	}
+	
+	public int getAMaxSize() {
+		return maxSize;
+	}
+	
+	public float getAvgRelPos() {
+		return avgRelPos;
+	}
+	
+	public int getMinRelPos() {
+		return minRelPos;
+	}
+	
+	public int getMaxRelPos() {
+		return maxRelPos;
+	}
+	
+	public int getCountComp() {
+		return countComp;
 	}
 
 }

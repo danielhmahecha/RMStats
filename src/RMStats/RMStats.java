@@ -47,10 +47,8 @@ public class RMStats {
 		}
 	}
 	
-	public static void getAvgScores() {
-		System.out.println("\n=======================================================================================================================================");
-		System.out.println("Class/Family\tAverage SWScore (min - max)\tAverage Perc. Div (min - max)\tAverage Perc. Del (min - max)\tAverage Perc. Ins (min - max)");
-		System.out.println("========================================================================================================================================");
+	public static void getAvgScoresSWDiv() {
+		System.out.println("\n|Class/Family|\t|mean SWScore|\t|min. SWScore|\t|max. SWScore|\t|mean %Div.|\t|min. %Div.|\t|max. %Div.|");
 
 		for (String rc: repeatClasses.keySet()) {		
 			for (String fm: repeatClasses.get(rc).getFamilies()) {
@@ -62,14 +60,6 @@ public class RMStats {
 				float avgDivPerc = repeatFamilies.get(fm).getAvgDivPerc();
 				float minDivPerc = repeatFamilies.get(fm).getMinDivPerc();
 				float maxDivPerc = repeatFamilies.get(fm).getMaxDivPerc();
-
-				float avgDelBP = repeatFamilies.get(fm).getAvgDelBP();
-				float minDelBP = repeatFamilies.get(fm).getMinDelBP();
-				float maxDelBP = repeatFamilies.get(fm).getMaxDelBP();
-
-				float avgInsBP = repeatFamilies.get(fm).getAvgInsBP();
-				float minInsBP = repeatFamilies.get(fm).getMinInsBP();
-				float maxInsBP = repeatFamilies.get(fm).getMaxInsBP();
 				
 				String roundAvgSWScore = String.format("%.2f", avgSWScore);
 				String roundMinSWScore = String.format("%.2f", minSWScore);
@@ -78,6 +68,27 @@ public class RMStats {
 				String roundAvgDivPerc = String.format("%.2f", avgDivPerc);
 				String roundMinDivPerc = String.format("%.2f", minDivPerc);
 				String roundMaxDivPerc = String.format("%.2f", maxDivPerc);
+				
+				System.out.println(rc + "/" + fm + "\t" 
+					    + roundAvgSWScore + "\t" + roundMinSWScore + "\t" + roundMaxSWScore + "\t"
+					    + roundAvgDivPerc + "\t" + roundMinDivPerc + "\t" + roundMaxDivPerc);
+			}
+		}
+	}
+	
+	public static void getAvgScoresDelIns() {
+		System.out.println("\n|Class/Family|\t|mean %Del.|\t|min. %Del.|\t|max %Del.|\t|mean "
+				+ "%Ins|\t|min %Ins.|\t|max %Ins.|");
+
+		for (String rc: repeatClasses.keySet()) {		
+			for (String fm: repeatClasses.get(rc).getFamilies()) {
+				float avgDelBP = repeatFamilies.get(fm).getAvgDelBP();
+				float minDelBP = repeatFamilies.get(fm).getMinDelBP();
+				float maxDelBP = repeatFamilies.get(fm).getMaxDelBP();
+
+				float avgInsBP = repeatFamilies.get(fm).getAvgInsBP();
+				float minInsBP = repeatFamilies.get(fm).getMinInsBP();
+				float maxInsBP = repeatFamilies.get(fm).getMaxInsBP();
 
 				String roundAvgDelBP = String.format("%.2f", avgDelBP);
 				String roundMinDelBP = String.format("%.2f", minDelBP);
@@ -88,15 +99,46 @@ public class RMStats {
 				String roundMaxInsBP = String.format("%.2f", maxInsBP);
 
 				
-				System.out.println(rc + "/" + fm + "\t" 
-					    + roundAvgSWScore + " (" + roundMinSWScore + " - " + roundMaxSWScore + ")\t"
-					    + roundAvgDivPerc + " (" + roundMinDivPerc + " - " + roundMaxDivPerc + ")\t"
-					    + roundAvgDelBP + " (" + roundMinDelBP + " - " + roundMaxDelBP + ")\t"
-					    + roundAvgInsBP + " (" + roundMinInsBP + " - " + roundMaxInsBP + ")");
+				System.out.println(rc + "/" + fm + "\t"
+					    + roundAvgDelBP + "\t" + roundMinDelBP + "\t" + roundMaxDelBP + "\t"
+					    + roundAvgInsBP + "\t" + roundMinInsBP + "\t" + roundMaxInsBP + "\t");
 
 			}
 		}
 	}
+	
+	public static void getSizePosition() {
+		System.out.println("\n|Class/Family|\t|mean Size|\t|min. Size|\t|max Size|\t"
+				+ "|%Comp. String|\t|mean Rel. Pos.|");
+		
+		for (String rc: repeatClasses.keySet()) {
+			for (String fm: repeatClasses.get(rc).getFamilies()) {
+				int meanSize = repeatFamilies.get(fm).getAvgSize();
+				int minSize = repeatFamilies.get(fm).getAMinSize();
+				int maxSize = repeatFamilies.get(fm).getAMaxSize();
+				
+				int totalComp = repeatFamilies.get(fm).getCountComp();
+				int totalElements = repeatFamilies.get(fm).getElementIDs().size();
+				float percComp = (float) totalComp / (float) totalElements;
+				
+				float meanRelPos = repeatFamilies.get(fm).getAvgRelPos();
+				
+				String roundMeanSize = Integer.toString(meanSize);
+				String roundMinSize = Integer.toString(minSize);
+				String roundMaxSize = Integer.toString(maxSize);
+				
+				String roundPercComp = String.format("%.2f", percComp);
+				String roundMeanRelPos = String.format("%.3f",meanRelPos);
+				
+				System.out.println(rc + "/" + fm + "\t"
+					    + roundMeanSize + "\t" + roundMinSize + "\t" + roundMaxSize + "\t"
+					    + roundPercComp + "\t" + roundMeanRelPos );
+
+			
+			}
+		}
+	}
+	
 	public static void getDivergence() {
 		float total = 0;
 		float sum = 0;
@@ -219,6 +261,23 @@ public class RMStats {
 		
 		float insBP = collection.get(codigo).getInsBPPercent();
 		repeatFamilies.get(familyName).updateInsBP(insBP);
+		
+		//Calculado con la query sequence
+		int size = collection.get(codigo).getEndPosQuery() - collection.get(codigo).getStartPosQuery();
+		repeatFamilies.get(familyName).updateSize(size);
+		
+		int endPos = collection.get(codigo).getEndPosQuery();
+		int startPos = collection.get(codigo).getStartPosQuery();
+		int medianPos = ((endPos-startPos)/2)+startPos;
+		int basesLeft = collection.get(codigo).getBasesAfterInQuery();
+		int  totalLength = endPos+basesLeft;
+		float relPos = (float)medianPos/(float)totalLength;
+		repeatFamilies.get(familyName).updateRelPos(relPos);
+				
+		char comp = collection.get(codigo).getIsComplement();
+		if (comp == 'C') {
+			repeatFamilies.get(familyName).updateComp(1);
+		} 
 	}
 	
 	public static void main(String[] args) throws IOException{
@@ -226,7 +285,9 @@ public class RMStats {
 		loadFile(fileName);
 		getSWScoreAverage();
 		getGrossCounts();
-		getAvgScores();
+		getAvgScoresSWDiv();
+		getAvgScoresDelIns();
+		getSizePosition();
 		
 	}
 }
