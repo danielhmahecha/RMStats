@@ -26,10 +26,12 @@ public class RMStats {
 	public static void getGrossCounts() {
 		int totalElements = collection.size();
 		System.out.println("Total of Elements: "+Integer.toString(totalElements));
+		System.out.println("\nNumber of Elements by Family");
+
 		for (String rc: repeatClasses.keySet()) {
-			System.out.println("\n\t==========");
-			System.out.println("\t"+rc);
-			System.out.println("\t==========\n");
+			System.out.println("\n==========");
+			System.out.println(""+rc);
+			System.out.println("==========\n");
 			int totalClass = 0;
 			
 			for (String fm: repeatClasses.get(rc).getFamilies()) {
@@ -37,12 +39,12 @@ public class RMStats {
 				totalClass += elementsFamily;
 				float percentage = (float)elementsFamily/totalElements *100;
 				String roundPercentage = String.format("%.2f", percentage);
-				System.out.println("\t "+fm+": "+elementsFamily+" ("+roundPercentage+"%)");
+				System.out.println(""+fm+": "+elementsFamily+" ("+roundPercentage+"%)");
 			}
 			
 			float classPercentage = (float)totalClass/totalElements *100;
 			String roundClassPercentage = String.format("%.2f", classPercentage);
-			System.out.println("\n\t Total "+rc+": "+totalClass+" ("+roundClassPercentage+"%)");
+			System.out.println("\nTotal "+rc+": "+totalClass+" ("+roundClassPercentage+"%)");
 
 		}
 	}
