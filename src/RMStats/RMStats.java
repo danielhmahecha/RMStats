@@ -1,5 +1,8 @@
 package RMStats;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -228,11 +231,38 @@ public class RMStats {
 		}
 	}
 	*/
-	
+    public static InputStream openFile(String fileName) throws IOException {
+        if (fileName == null) {
+            throw new IllegalArgumentException("El nombre del archivo no debe ser nulo.");
+        }
+
+        InputStream stream;
+        if (fileName.toLowerCase().endsWith(".gz")) {
+            stream = new ConcatGZIPInputStream(new FileInputStream(fileName));
+        } else {
+            stream = new FileInputStream(fileName);
+        }
+
+        return stream;
+    }
+    
 	public static void loadFile (String fileName) throws IOException{
-				
-		FileReader fr = new FileReader (fileName);
-		BufferedReader br = new BufferedReader(fr);
+		/*
+		private void init (InputStream stream, File file) throws IOException {
+			if (stream != null && file != null) throw new IllegalArgumentException("Stream and file are mutually exclusive");
+			if(file!=null) {
+				stream = new FileInputStream(file);
+				if(file.getName().toLowerCase().endsWith(".gz")) {
+					stream = new ConcatGZIPInputStream(stream);
+				}
+			}
+			in = new BufferedReader(new InputStreamReader(stream));
+			//Sequence name by default
+			setSequenceType(DNAMaskedSequence.class);
+		}
+		*/
+		InputStream fr = openFile(fileName);
+		BufferedReader br = new BufferedReader(new InputStreamReader(fr));
 		String line = br.readLine();
 		line = br.readLine();
 		line = br.readLine();
@@ -326,6 +356,7 @@ public class RMStats {
 			line = br.readLine();
 			
 		}
+		
 	}
 	
 	/*
