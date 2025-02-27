@@ -6,6 +6,7 @@ public class repeatFamily {
 	private String familyName;
 	private HashSet<String> elementIDs = new HashSet<>();
 	
+	/*
 	private float avgSWScore=0;
 	private float maxSWScore=0;
 	private float minSWScore= Float.MAX_VALUE;
@@ -31,6 +32,7 @@ public class repeatFamily {
 	private float avgRelPos=0;
 	private int minRelPos=Integer.MAX_VALUE;
 	private int maxRelPos=0;
+	*/
 
 	public repeatFamily() {
 		
@@ -52,6 +54,7 @@ public class repeatFamily {
 		elementIDs.add(elementID);
 	}
 	
+	/*
 	public void updateAvgSWScore(float newVal) {
 		int previousElementCount = elementIDs.size()-1;
 		avgSWScore = ((avgSWScore*previousElementCount) + newVal )/ ((float) elementIDs.size());
@@ -173,5 +176,6 @@ public class repeatFamily {
 	public int getCountComp() {
 		return countComp;
 	}
+	*/
 
 }

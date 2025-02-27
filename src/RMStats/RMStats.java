@@ -2,6 +2,7 @@ package RMStats;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.io.BufferedReader; 
 import java.io.FileReader;
 
@@ -26,12 +27,12 @@ public class RMStats {
 	public static void getGrossCounts() {
 		int totalElements = collection.size();
 		System.out.println("Total of Elements: "+Integer.toString(totalElements));
-		System.out.println("\nNumber of Elements by Family");
+		System.out.println("\n=====Number of Elements by Family=====");
 
 		for (String rc: repeatClasses.keySet()) {
-			System.out.println("\n==========");
+			System.out.println("\n=============");
 			System.out.println(""+rc);
-			System.out.println("==========\n");
+			System.out.println("=============\n");
 			int totalClass = 0;
 			
 			for (String fm: repeatClasses.get(rc).getFamilies()) {
@@ -45,10 +46,86 @@ public class RMStats {
 			float classPercentage = (float)totalClass/totalElements *100;
 			String roundClassPercentage = String.format("%.2f", classPercentage);
 			System.out.println("\nTotal "+rc+": "+totalClass+" ("+roundClassPercentage+"%)");
+			//TODO: RELATIVE PERCENTAGES
 
 		}
 	}
 	
+	public static void getFamilyCounts(){
+		System.out.println("\n|Class/Family|"
+				+ "\t|mean SWScore|\t|median. SWScore|\t|min. SWScore|\t|max. SWScore|\t|S.D. SWScore|"
+				+ "\t|mean %Div.|\t|median. %Div.|\t|min. %Div.|\t|max. %Div.|\t|S.D. %Div.|"
+				+ "\t|mean %Ins.|\t|median. %Ins.|\t|min. %Ins.|\t|max. %Ins.|\t|S.D. %Ins.|"
+				+ "\t|mean %Del.|\t|median. %Del.|\t|min. %Del.|\t|max. %Del.|\t|S.D. %Del.|"
+				+ "\t|mean size|\t|median. size|\t|min. size|\t|max. size|\t|S.D. size|"
+				+ "\t|%Comp.|");
+
+		for (String rc: repeatClasses.keySet()) {
+			for (String fm: repeatClasses.get(rc).getFamilies()) {
+				ArrayList<Float> SWScores = new ArrayList<Float>();
+				ArrayList<Float> pDiv = new ArrayList<Float>();
+				ArrayList<Float> pIns = new ArrayList<Float>();
+				ArrayList<Float> pDel = new ArrayList<Float>();
+				ArrayList<Float> sizes = new ArrayList<Float>();
+				int pComp = 0;
+				
+				for (String el: repeatFamilies.get(fm).getElementIDs()) {
+					RMElement element = collection.get(el);
+					SWScores.add(element.getSWScore());
+					pDiv.add(element.getDivPercent());
+					pIns.add(element.getInsBPPercent());
+					pDel.add(element.getDelBPPercent());
+					sizes.add((float) (-element.getStartPosQuery()+element.getEndPosQuery())); //size calculado con el Query
+					if (element.getIsComplement()=='C') pComp ++;
+				}
+				
+				double percComp = (float) pComp / SWScores.size();
+				
+				System.out.print(rc + "/" + fm+"\t");
+				printStats(getFamilyStats(SWScores));
+				printStats(getFamilyStats(pDiv));
+				printStats(getFamilyStats(pIns));
+				printStats(getFamilyStats(pDel));
+				printStats(getFamilyStats(sizes));
+				System.out.print(Double.toString(percComp));
+				System.out.println();
+
+			}
+		}
+		
+	}
+	
+	public static void printStats(double[] values) {
+		for (double stat : values) {
+			if (Double.isNaN(stat)) stat=0;
+		    System.out.print(String.format("%.5f" , stat)+ "\t"); //con 5 cifras decimales
+		}
+	}
+	
+	public static double[] getFamilyStats(ArrayList<Float> lista) {
+		double average = lista.stream().mapToDouble(Float::doubleValue).average().orElse(0.0);
+		double median = getMedian(lista);
+		double min = Collections.min(lista).doubleValue();
+		double max = Collections.max(lista).doubleValue();
+		double variance = lista.stream().mapToDouble(num -> Math.pow(num - average, 2)).sum() / (lista.size() - 1);
+		double SD = Math.sqrt(variance);
+		return new double[] {average,median,min,max,SD};
+	}
+	
+	public static double getMedian(ArrayList<Float> lista) {
+		if (lista.isEmpty()) return 0;
+		Collections.sort(lista);
+		int listSize = lista.size();
+		int mid = listSize / 2;
+		
+		if (listSize % 2 == 0) {
+			return (lista.get(mid-1)+lista.get(mid)) / 2.0f;
+		} else {
+			return (lista.get(mid));
+		}
+	}
+	
+	/*
 	public static void getAvgScoresSWDiv() {
 		System.out.println("\n|Class/Family|\t|mean SWScore|\t|min. SWScore|\t|max. SWScore|\t|mean %Div.|\t|min. %Div.|\t|max. %Div.|");
 
@@ -150,6 +227,7 @@ public class RMStats {
 			total++;
 		}
 	}
+	*/
 	
 	public static void loadFile (String fileName) throws IOException{
 				
@@ -244,12 +322,13 @@ public class RMStats {
 			
 			repeatClasses.get(className).addFamily(familyName);
 			repeatFamilies.get(familyName).addElement(codigo);
-			updateFamilyValues(familyName, codigo);
+			//updateFamilyValues(familyName, codigo);
 			line = br.readLine();
 			
 		}
 	}
 	
+	/*
 	public static void updateFamilyValues(String familyName, String codigo) {
 		
 		float SWScore = collection.get(codigo).getSWScore();
@@ -281,15 +360,16 @@ public class RMStats {
 			repeatFamilies.get(familyName).updateComp(1);
 		} 
 	}
+	*/
 	
 	public static void main(String[] args) throws IOException{
 		String fileName = args[0];
 		loadFile(fileName);
-		getSWScoreAverage();
 		getGrossCounts();
-		getAvgScoresSWDiv();
-		getAvgScoresDelIns();
-		getSizePosition();
+		getFamilyCounts();
+		//getAvgScoresSWDiv();
+		//getAvgScoresDelIns();
+		//getSizePosition();
 		
 	}
 }
