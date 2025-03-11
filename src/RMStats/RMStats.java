@@ -53,7 +53,7 @@ public class RMStats {
 
 		}
 	}
-	
+	//TODO: Crear objetos genomic region. mirar si tiene método totalspan. región, tengo la base más adelante, si el comienzo se sobrelapa se tiene en cuenta solo la diferencia. si está embebida totalmente no hacer nada.
 	public static void getFamilyCounts(){
 		System.out.println("\n|Class/Family|"
 				+ "\t|mean SWScore|\t|median. SWScore|\t|min. SWScore|\t|max. SWScore|\t|S.D. SWScore|"
@@ -271,62 +271,69 @@ public class RMStats {
 		while (line != null){
 			//System.out.println("Processing: "+line);
 
-			RMElement element = new RMElement();
+			RMMatch match = new RMMatch();
 			String[] fields = line.stripLeading().split("\\s+");
 						
 			//System.out.println("Processing element 0: "+fields[0]);
-			element.setSWScore(Float.parseFloat(fields[0]));
+			match.setSWScore(Float.parseFloat(fields[0]));
 
 			//System.out.println("Processing element 1: "+fields[1]);
 
-			element.setDivPercent(Float.parseFloat(fields[1]));
+			match.setDivPercent(Float.parseFloat(fields[1]));
 
-			element.setDelBPPercent(Float.parseFloat(fields[2]));
+			match.setDelBPPercent(Float.parseFloat(fields[2]));
 			//System.out.println("Processing element 2: "+fields[2]);
 
 			//System.out.println("Processing element 3: "+fields[3]);
 
-			element.setInsBPPercent(Float.parseFloat(fields[3]));
+			match.setInsBPPercent(Float.parseFloat(fields[3]));
 			
 			//System.out.println("Processing element 4: "+fields[4]);
-			element.setQuerySeq(fields[4]); 
+			match.setQuerySeq(fields[4]); 
 			
 			//System.out.println("Processing element 5: "+fields[5]);
-			element.setStartPosQuery(Integer.parseInt(fields[5]));
+			match.setStartPosQuery(Integer.parseInt(fields[5]));
 			
 			//System.out.println("Processing element 6: "+fields[6]);
-			element.setEndPosQuery(Integer.parseInt(fields[6]));
+			match.setEndPosQuery(Integer.parseInt(fields[6]));
 			
 			//System.out.println("Processing element 7: "+fields[7]);
 			String left = fields[7].replace("(", "").replace(")", "");
-			element.setBasesAfterInQuery(Integer.parseInt(left));
+			match.setBasesAfterInQuery(Integer.parseInt(left));
 			
 			//System.out.println("Processing element 8: "+fields[8]);
-			element.setIsComplement(fields[8].charAt(0));
+			match.setIsComplement(fields[8].charAt(0));
 			
 			//System.out.println("Processing element 9: "+fields[9]);
-			element.setRepeatName(fields[9]);
+			match.setRepeatName(fields[9]);
 			
 			//System.out.println("Processing element 10: "+fields[10]);
-			element.setRepeatFamily(fields[10]);
+			match.setRepeatFamily(fields[10]);
 			
 			//System.out.println("Processing element 11: "+fields[11]);
 			String some = fields[11].replace("(", "").replace(")", "");
 
-			element.setBasesPriorCons(Integer.parseInt(some));
+			match.setBasesPriorCons(Integer.parseInt(some));
 			
 			//System.out.println("Processing element: "+fields[12]);
 
-			element.setStartPosCons(Integer.parseInt(fields[12]));
+			match.setStartPosCons(Integer.parseInt(fields[12]));
 			
 			String endPosCons = fields[13].replaceAll("[()]", "");
 			//System.out.println("Processing element: "+endPosCons);
 			
-			element.setEndPosCons(Integer.parseInt(endPosCons));
-	        int elementID = Integer.parseInt(fields[14]);
-	        element.setUniqueID(elementID);
-	        String codigo = fields[14]+":"+fields[5];
-			collection.put(codigo, element);
+			match.setEndPosCons(Integer.parseInt(endPosCons));
+	        String elementID = fields[14];
+	        match.setUniqueID(Integer.parseInt(elementID));
+	        String codigo = fields[14];
+	       
+	        collection.computeIfAbsent(elementID, id -> {
+	            RMElement element = new RMElement();
+	            element.setUniqueID(Integer.parseInt(id));
+	            return element;
+	        }).addMatch(match);
+	       
+			//collection.put(codigo, element);
 			String subclass = fields[10];
 			
 	      	String className = subclass;
@@ -355,6 +362,9 @@ public class RMStats {
 			//updateFamilyValues(familyName, codigo);
 			line = br.readLine();
 			
+		}
+		for (RMElement e: collection.values()) {
+			e.mergeIntervals();
 		}
 		
 	}

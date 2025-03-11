@@ -1,144 +1,51 @@
 package RMStats;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+
 public class RMElement {
-	private float SWScore;
-	private float divPercent;
-	private float delBPPercent;
-	private float insBPPercent;
-	private String querySeq;
-	private int startPosQuery;
-	private int endPosQuery;
-	private int basesAfterInQuery;
-	private char isComplement;
-	private String repeatName;
-	private String repeatFamily;
-	private int basesPriorCons;
-	private int startPosCons;
-	private int endPosCons;
 	private int uniqueID;
+	private HashSet<RMMatch> matches = new HashSet<>();
+	private List<int[]> intervals = new ArrayList<>();
+	private int size;
 	
 	public RMElement() {
 		
 	}
-	
-	public void setSWScore(float SWScore) {
-	    this.SWScore = SWScore;
-	}
-
-	public void setDivPercent(float divPercent) {
-	    this.divPercent = divPercent;
-	}
-
-	public void setDelBPPercent(float delBPPercent) {
-	    this.delBPPercent = delBPPercent;
-	}
-
-	public void setInsBPPercent(float insBPPercent) {
-	    this.insBPPercent = insBPPercent;
-	}
-
-	public void setQuerySeq(String querySeq) {
-	    this.querySeq = querySeq;
-	}
-
-	public void setStartPosQuery(int startPosQuery) {
-	    this.startPosQuery = startPosQuery;
-	}
-
-	public void setEndPosQuery(int endPosQuery) {
-	    this.endPosQuery = endPosQuery;
-	}
-
-	public void setBasesAfterInQuery(int basesAfterInQuery) {
-	    this.basesAfterInQuery = basesAfterInQuery;
-	}
-
-	public void setIsComplement(char isComplement) {
-	    this.isComplement = isComplement;
-	}
-
-	public void setRepeatName(String repeatName) {
-	    this.repeatName = repeatName;
-	}
-
-	public void setRepeatFamily(String repeatSubClass) {
-	    this.repeatFamily = repeatSubClass;
-	}
-
-	public void setBasesPriorCons(int basesPriorCons) {
-	    this.basesPriorCons = basesPriorCons;
-	}
-
-	public void setStartPosCons(int startPosCons) {
-	    this.startPosCons = startPosCons;
+	public void setUniqueID (int uniqueID) {
+		this.uniqueID=uniqueID;
 	}
 	
-	public void setEndPosCons(int endPosCons) {
-		this.endPosCons = endPosCons;
-	}
-
-	public void setUniqueID(int uniqueID) {
-	    this.uniqueID = uniqueID;
-	}
-
-	public float getSWScore() {
-	    return SWScore;
+	public int getID() {
+		return this.uniqueID;
 	}
 	
-	public int getEndPosCons() {
-		return endPosCons;
+	public HashSet<RMMatch> getMatches(){
+		return this.matches;
 	}
-
-	public float getDivPercent() {
-	    return divPercent;
+	
+	public void addMatch(RMMatch match) {
+		matches.add(match);
+		intervals.add(new int[] {match.getStartPosQuery(),match.getEndPosQuery()});
 	}
-
-	public float getDelBPPercent() {
-	    return delBPPercent;
+	
+	public void mergeIntervals() {
+		intervals.sort(Comparator.comparingInt(a -> a[0]));
+		int totalLength = 0;
+		int[] previous = intervals.get(0);
+		for (int i=1; i<intervals.size();i++) {
+			int[] current = intervals.get(i);
+			if (current[0] > previous[1]) {
+				totalLength += (previous[1]-previous[0]+1);
+				previous = current;
+			}else {
+				previous[1] = Math.max(previous[1], current[1]);
+			}
+		}
+		
+		totalLength += (previous[1] - previous[0] +1);
+		size = totalLength;
 	}
-
-	public float getInsBPPercent() {
-	    return insBPPercent;
-	}
-
-	public String getQuerySeq() {
-	    return querySeq;
-	}
-
-	public int getStartPosQuery() {
-	    return startPosQuery;
-	}
-
-	public int getEndPosQuery() {
-	    return endPosQuery;
-	}
-
-	public int getBasesAfterInQuery() {
-	    return basesAfterInQuery;
-	}
-
-	public char getIsComplement() {
-	    return isComplement;
-	}
-
-	public String getRepeatName() {
-	    return repeatName;
-	}
-
-	public String getRepeatSubClass() {
-	    return repeatFamily;
-	}
-
-	public int getBasesPriorCons() {
-	    return basesPriorCons;
-	}
-
-	public int getStartPosCons() {
-	    return startPosCons;
-	}
-
-	public int getUniqueID() {
-	    return uniqueID;
-	}
-
 }
