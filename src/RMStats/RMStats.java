@@ -20,8 +20,11 @@ public class RMStats {
 		float sum = 0;
 		for (String elementID: collection.keySet()) {
 			RMElement e = collection.get(elementID);
-			sum += e.getSWScore();
-			total++;
+			for (RMMatch mt: e.getMatches()) {
+				sum += mt.getSWScore();
+				total++;
+			}
+		
 		}
 		float avg = sum/total;
 		System.out.println("SWScore Average: "+Float.toString(avg));
@@ -29,32 +32,73 @@ public class RMStats {
 	
 	public static void getGrossCounts() {
 		int totalElements = collection.size();
-		System.out.println("Total of Elements: "+Integer.toString(totalElements));
-		System.out.println("\n=====Number of Elements by Family=====");
+		int totalSize = getTotalSize();
+		
+		System.out.println(">=====Number of Elements by Family=====");
+		System.out.println("\nTotal of Elements: "+Integer.toString(totalElements)+
+				"\nTotal Size (bp): "+Integer.toString(totalSize));
 
 		for (String rc: repeatClasses.keySet()) {
-			System.out.println("\n=============");
-			System.out.println(""+rc);
-			System.out.println("=============\n");
+			System.out.println("\n------------");
+			System.out.println("Class: "+rc);
+			System.out.println("------------");
+
+			System.out.println("|Family|"
+					+ "\t|Number of Elements|"
+					+ "\t|Size of Family (bp)|"
+					+ "\t|Percentage of Class Size|"
+					+ "\t|Percentage of Total Size|");
 			int totalClass = 0;
+			int classSize = 0;
+			HashMap<String,Integer[]> sizesMap = new HashMap<>(); //integer array de: Family Size, Number of Elements, 
 			
 			for (String fm: repeatClasses.get(rc).getFamilies()) {
+				int familySize = 0;
 				int elementsFamily = repeatFamilies.get(fm).getElementIDs().size();
 				totalClass += elementsFamily;
-				float percentage = (float)elementsFamily/totalElements *100;
-				String roundPercentage = String.format("%.2f", percentage);
-				System.out.println(""+fm+": "+elementsFamily+" ("+roundPercentage+"%)");
+				//float percentage = (float)elementsFamily/totalElements *100;
+				//String roundPercentage = String.format("%.2f", percentage);
+				
+				for (String el: repeatFamilies.get(fm).getElementIDs()) {
+					RMElement element = collection.get(el);
+					familySize += element.getSize();
+				}
+				classSize += familySize;
+				Integer[] sizeAndElements = {familySize, elementsFamily};
+				sizesMap.putIfAbsent(fm, sizeAndElements);
+				//System.out.println(""+fm+": "+elementsFamily+" ("+roundPercentage+"%)+" ");
 			}
 			
-			float classPercentage = (float)totalClass/totalElements *100;
-			String roundClassPercentage = String.format("%.2f", classPercentage);
-			System.out.println("\nTotal "+rc+": "+totalClass+" ("+roundClassPercentage+"%)");
+			//float classPercentage = (float)totalClass/totalElements *100;
+			//String roundClassPercentage = String.format("%.2f", classPercentage);
+			for (String fm: sizesMap.keySet()) {				
+				int familySize = sizesMap.get(fm)[0];
+				String familySizeStr = Integer.toString(familySize);
+				String numberElements = Integer.toString(sizesMap.get(fm)[1]);
+				String sizePercentageOfTotal = String.format("%.2f",(float) familySize/totalSize *100);
+				String sizePercentageOfClass = String.format("%.2f",(float) familySize/classSize *100);
+				System.out.println(fm+"\t"+numberElements+"\t"+familySizeStr+"\t"+sizePercentageOfClass+"%\t"+sizePercentageOfTotal+"%");
+			}
+			String classSizePercentageOfTotal = String.format("%.2f",(float) classSize/totalSize *100);
+			System.out.println("\nTotal-"+rc+"\t"+totalClass+"\t"+classSize+"\t100%\t"+classSizePercentageOfTotal+"%");
 			//TODO: RELATIVE PERCENTAGES
 
 		}
 	}
 	//TODO: Crear objetos genomic region. mirar si tiene método totalspan. región, tengo la base más adelante, si el comienzo se sobrelapa se tiene en cuenta solo la diferencia. si está embebida totalmente no hacer nada.
+	
+	public static int getTotalSize() {
+		int totalSize = 0;
+		
+		for (RMElement el: collection.values()) {
+			totalSize += el.getSize();
+		}
+		
+		return totalSize;
+	}
+	
 	public static void getFamilyCounts(){
+		System.out.println("\n\n@=====Match Scores Summary Statistics by Family=====");
 		System.out.println("\n|Class/Family|"
 				+ "\t|mean SWScore|\t|median. SWScore|\t|min. SWScore|\t|max. SWScore|\t|S.D. SWScore|"
 				+ "\t|mean %Div.|\t|median. %Div.|\t|min. %Div.|\t|max. %Div.|\t|S.D. %Div.|"
@@ -74,12 +118,16 @@ public class RMStats {
 				
 				for (String el: repeatFamilies.get(fm).getElementIDs()) {
 					RMElement element = collection.get(el);
-					SWScores.add(element.getSWScore());
-					pDiv.add(element.getDivPercent());
-					pIns.add(element.getInsBPPercent());
-					pDel.add(element.getDelBPPercent());
-					sizes.add((float) (-element.getStartPosQuery()+element.getEndPosQuery())); //size calculado con el Query
-					if (element.getIsComplement()=='C') pComp ++;
+					for (RMMatch mt: element.getMatches()) {
+						SWScores.add(mt.getSWScore());
+						pDiv.add(mt.getDivPercent());
+						pIns.add(mt.getInsBPPercent());
+						pDel.add(mt.getDelBPPercent());
+						sizes.add((float) (-mt.getStartPosQuery()+mt.getEndPosQuery())); //size calculado con el Query
+						if (mt.getIsComplement()=='C') pComp ++;
+
+					}
+				
 				}
 				
 				double percComp = (float) pComp / SWScores.size();

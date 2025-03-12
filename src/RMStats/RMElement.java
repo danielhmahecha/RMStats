@@ -26,6 +26,10 @@ public class RMElement {
 		return this.matches;
 	}
 	
+	public int getSize() {
+		return this.size;
+	}
+	
 	public void addMatch(RMMatch match) {
 		matches.add(match);
 		intervals.add(new int[] {match.getStartPosQuery(),match.getEndPosQuery()});
