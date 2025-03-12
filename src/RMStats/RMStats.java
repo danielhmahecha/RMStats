@@ -4,16 +4,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.ArrayList;
 import java.io.BufferedReader; 
-import java.io.FileReader;
+//import java.io.FileReader;
 
 public class RMStats {
 	
 	private static HashMap<String, RMElement> collection = new HashMap<>();
 	private static HashMap<String, repeatClass> repeatClasses = new HashMap<>();
 	private static HashMap<String, repeatFamily> repeatFamilies = new HashMap<>();
+	private static List<int[]> intervals = new ArrayList<>();
+	private static int totalMatchSize;
 	
 	public static void getSWScoreAverage() {
 		int total = 0;
@@ -294,7 +298,26 @@ public class RMStats {
         return stream;
     }
     
-	public static void loadFile (String fileName) throws IOException{
+    public static void mergeIntervals() {
+		intervals.sort(Comparator.comparingInt(a -> a[0]));
+		int totalLength = 0;
+		int[] previous = intervals.get(0);
+		for (int i=1; i<intervals.size();i++) {
+			int[] current = intervals.get(i);
+			if (current[0] > previous[1]) {
+				totalLength += (previous[1]-previous[0]+1);
+				previous = current;
+			}else {
+				previous[1] = Math.max(previous[1], current[1]);
+			}
+		}
+		
+		totalLength += (previous[1] - previous[0] +1);
+		totalMatchSize = totalLength;
+	}
+    
+	
+    public static void loadFile (String fileName) throws IOException{
 		/*
 		private void init (InputStream stream, File file) throws IOException {
 			if (stream != null && file != null) throw new IllegalArgumentException("Stream and file are mutually exclusive");
@@ -344,6 +367,9 @@ public class RMStats {
 			
 			//System.out.println("Processing element 6: "+fields[6]);
 			match.setEndPosQuery(Integer.parseInt(fields[6]));
+			
+			int[] interval = {Integer.parseInt(fields[5]),Integer.parseInt(fields[6])};
+			intervals.add(interval);
 			
 			//System.out.println("Processing element 7: "+fields[7]);
 			String left = fields[7].replace("(", "").replace(")", "");
@@ -454,6 +480,8 @@ public class RMStats {
 	public static void main(String[] args) throws IOException{
 		String fileName = args[0];
 		loadFile(fileName);
+		mergeIntervals();
+		System.out.println("Total Positions (bp): "+Integer.toString(totalMatchSize)+"\n");
 		getGrossCounts();
 		getFamilyCounts();
 		//getAvgScoresSWDiv();
