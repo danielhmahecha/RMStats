@@ -16,7 +16,7 @@ public class RMStats {
 	private static HashMap<String, RMElement> collection = new HashMap<>();
 	private static HashMap<String, repeatClass> repeatClasses = new HashMap<>();
 	private static HashMap<String, repeatFamily> repeatFamilies = new HashMap<>();
-	private static List<int[]> intervals = new ArrayList<>();
+	private static HashMap<String, List<int[]>> intervals= new HashMap<>();
 	private static int totalMatchSize;
 	
 	public static void getSWScoreAverage() {
@@ -299,22 +299,26 @@ public class RMStats {
     }
     
     public static void mergeIntervals() {
-		intervals.sort(Comparator.comparingInt(a -> a[0]));
-		int totalLength = 0;
-		int[] previous = intervals.get(0);
-		for (int i=1; i<intervals.size();i++) {
-			int[] current = intervals.get(i);
-			if (current[0] > previous[1]) {
-				totalLength += (previous[1]-previous[0]+1);
-				previous = current;
-			}else {
-				previous[1] = Math.max(previous[1], current[1]);
-			}
+    	for (List<int[]> queryList: intervals.values()){
+    		queryList.sort(Comparator.comparingInt(a -> a[0]));
+    		int totalLength = 0;
+    		int[] previous = queryList.get(0);
+    		for (int i=1; i<queryList.size();i++) {
+    			
+    			int[] current = queryList.get(i);
+    			
+    			if (current[0] > previous[1]) {
+    				totalLength += (previous[1]-previous[0]+1);
+    				previous = current;
+    			}else {
+    				previous[1] = Math.max(previous[1], current[1]);
+    			}
+        	}
+			totalLength += (previous[1] - previous[0] +1);
+			totalMatchSize += totalLength;
+
 		}
-		
-		totalLength += (previous[1] - previous[0] +1);
-		totalMatchSize = totalLength;
-	}
+    }
     
 	
     public static void loadFile (String fileName) throws IOException{
@@ -369,7 +373,14 @@ public class RMStats {
 			match.setEndPosQuery(Integer.parseInt(fields[6]));
 			
 			int[] interval = {Integer.parseInt(fields[5]),Integer.parseInt(fields[6])};
-			intervals.add(interval);
+			if (intervals.containsKey(match.getQuerySeq())){
+				intervals.get(match.getQuerySeq()).add(interval);
+				
+			}else {
+				List<int[]> newlist = new ArrayList<>();
+				newlist.add(interval);
+				intervals.put(match.getQuerySeq(), newlist);
+			}
 			
 			//System.out.println("Processing element 7: "+fields[7]);
 			String left = fields[7].replace("(", "").replace(")", "");
