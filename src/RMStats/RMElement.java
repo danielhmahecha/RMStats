@@ -8,7 +8,7 @@ import java.util.List;
 public class RMElement {
 	private int uniqueID;
 	private HashSet<RMMatch> matches = new HashSet<>();
-	private List<int[]> intervals = new ArrayList<>();
+	private List<long[]> intervals = new ArrayList<>();
 	private int size;
 	
 	public RMElement() {
@@ -32,15 +32,15 @@ public class RMElement {
 	
 	public void addMatch(RMMatch match) {
 		matches.add(match);
-		intervals.add(new int[] {match.getStartPosQuery(),match.getEndPosQuery()});
+		intervals.add(new long[] {match.getStartPosQuery(),match.getEndPosQuery()});
 	}
 	
 	public void mergeIntervals() {
-		intervals.sort(Comparator.comparingInt(a -> a[0]));
+		intervals.sort(Comparator.comparingLong(a -> a[0]));
 		int totalLength = 0;
-		int[] previous = intervals.get(0);
+		long[] previous = intervals.get(0);
 		for (int i=1; i<intervals.size();i++) {
-			int[] current = intervals.get(i);
+			long[] current = intervals.get(i);
 			if (current[0] > previous[1]) {
 				totalLength += (previous[1]-previous[0]+1);
 				previous = current;

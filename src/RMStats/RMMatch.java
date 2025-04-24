@@ -6,15 +6,15 @@ public class RMMatch {
 	private float delBPPercent;
 	private float insBPPercent;
 	private String querySeq;
-	private int startPosQuery;
-	private int endPosQuery;
-	private int basesAfterInQuery;
+	private long startPosQuery;
+	private long endPosQuery;
+	private long basesAfterInQuery;
 	private char isComplement;
 	private String repeatName;
 	private String repeatFamily;
-	private int basesPriorCons;
-	private int startPosCons;
-	private int endPosCons;
+	private long basesPriorCons;
+	private long startPosCons;
+	private long endPosCons;
 	private int uniqueID;
 	
 	public RMMatch() {
@@ -41,15 +41,15 @@ public class RMMatch {
 	    this.querySeq = querySeq;
 	}
 
-	public void setStartPosQuery(int startPosQuery) {
-	    this.startPosQuery = startPosQuery;
+	public void setStartPosQuery(long l) {
+	    this.startPosQuery = l;
 	}
 
-	public void setEndPosQuery(int endPosQuery) {
+	public void setEndPosQuery(long endPosQuery) {
 	    this.endPosQuery = endPosQuery;
 	}
 
-	public void setBasesAfterInQuery(int basesAfterInQuery) {
+	public void setBasesAfterInQuery(long basesAfterInQuery) {
 	    this.basesAfterInQuery = basesAfterInQuery;
 	}
 
@@ -65,15 +65,15 @@ public class RMMatch {
 	    this.repeatFamily = repeatSubClass;
 	}
 
-	public void setBasesPriorCons(int basesPriorCons) {
+	public void setBasesPriorCons(long basesPriorCons) {
 	    this.basesPriorCons = basesPriorCons;
 	}
 
-	public void setStartPosCons(int startPosCons) {
+	public void setStartPosCons(long startPosCons) {
 	    this.startPosCons = startPosCons;
 	}
 	
-	public void setEndPosCons(int endPosCons) {
+	public void setEndPosCons(long endPosCons) {
 		this.endPosCons = endPosCons;
 	}
 
@@ -85,7 +85,7 @@ public class RMMatch {
 	    return SWScore;
 	}
 	
-	public int getEndPosCons() {
+	public long getEndPosCons() {
 		return endPosCons;
 	}
 
@@ -105,15 +105,15 @@ public class RMMatch {
 	    return querySeq;
 	}
 
-	public int getStartPosQuery() {
+	public long getStartPosQuery() {
 	    return startPosQuery;
 	}
 
-	public int getEndPosQuery() {
+	public long getEndPosQuery() {
 	    return endPosQuery;
 	}
 
-	public int getBasesAfterInQuery() {
+	public long getBasesAfterInQuery() {
 	    return basesAfterInQuery;
 	}
 
@@ -129,11 +129,11 @@ public class RMMatch {
 	    return repeatFamily;
 	}
 
-	public int getBasesPriorCons() {
+	public long getBasesPriorCons() {
 	    return basesPriorCons;
 	}
 
-	public int getStartPosCons() {
+	public long getStartPosCons() {
 	    return startPosCons;
 	}
 

@@ -16,8 +16,9 @@ public class RMStats {
 	private static HashMap<String, RMElement> collection = new HashMap<>();
 	private static HashMap<String, repeatClass> repeatClasses = new HashMap<>();
 	private static HashMap<String, repeatFamily> repeatFamilies = new HashMap<>();
-	private static HashMap<String, List<int[]>> intervals= new HashMap<>();
+	private static HashMap<String, List<long[]>> intervals= new HashMap<>();
 	private static int totalMatchSize;
+	private static long genomeSize;
 	
 	public static void getSWScoreAverage() {
 		int total = 0;
@@ -299,13 +300,13 @@ public class RMStats {
     }
     
     public static void mergeIntervals() {
-    	for (List<int[]> queryList: intervals.values()){
-    		queryList.sort(Comparator.comparingInt(a -> a[0]));
+    	for (List<long[]> queryList: intervals.values()){
+    		queryList.sort(Comparator.comparingLong(a -> a[0]));
     		int totalLength = 0;
-    		int[] previous = queryList.get(0);
+    		long[] previous = queryList.get(0);
     		for (int i=1; i<queryList.size();i++) {
     			
-    			int[] current = queryList.get(i);
+    			long[] current = queryList.get(i);
     			
     			if (current[0] > previous[1]) {
     				totalLength += (previous[1]-previous[0]+1);
@@ -367,24 +368,24 @@ public class RMStats {
 			match.setQuerySeq(fields[4]); 
 			
 			//System.out.println("Processing element 5: "+fields[5]);
-			match.setStartPosQuery(Integer.parseInt(fields[5]));
+			match.setStartPosQuery(Long.parseLong(fields[5]));
 			
 			//System.out.println("Processing element 6: "+fields[6]);
-			match.setEndPosQuery(Integer.parseInt(fields[6]));
+			match.setEndPosQuery(Long.parseLong(fields[6]));
 			
-			int[] interval = {Integer.parseInt(fields[5]),Integer.parseInt(fields[6])};
+			long[] interval = {Long.parseLong(fields[5]),Long.parseLong(fields[6])};
 			if (intervals.containsKey(match.getQuerySeq())){
 				intervals.get(match.getQuerySeq()).add(interval);
 				
 			}else {
-				List<int[]> newlist = new ArrayList<>();
+				List<long[]> newlist = new ArrayList<>();
 				newlist.add(interval);
 				intervals.put(match.getQuerySeq(), newlist);
 			}
 			
 			//System.out.println("Processing element 7: "+fields[7]);
 			String left = fields[7].replace("(", "").replace(")", "");
-			match.setBasesAfterInQuery(Integer.parseInt(left));
+			match.setBasesAfterInQuery(Long.parseLong(left));
 			
 			//System.out.println("Processing element 8: "+fields[8]);
 			match.setIsComplement(fields[8].charAt(0));
@@ -398,11 +399,11 @@ public class RMStats {
 			//System.out.println("Processing element 11: "+fields[11]);
 			String some = fields[11].replace("(", "").replace(")", "");
 
-			match.setBasesPriorCons(Integer.parseInt(some));
+			match.setBasesPriorCons(Long.parseLong(some));
 			
 			//System.out.println("Processing element: "+fields[12]);
 
-			match.setStartPosCons(Integer.parseInt(fields[12]));
+			match.setStartPosCons(Long.parseLong(fields[12]));
 			
 			String endPosCons = fields[13].replaceAll("[()]", "");
 			//System.out.println("Processing element: "+endPosCons);
@@ -487,11 +488,32 @@ public class RMStats {
 		} 
 	}
 	*/
-	
+	public static void geneSize(String sizesFile, String fileName) throws IOException{
+		String genomeID = fileName.replaceFirst("\\.repeatMasker\\.out\\.gz$", "");
+		genomeID = genomeID.substring(genomeID.lastIndexOf("/") + 1);
+		InputStream fr = openFile(sizesFile);
+		BufferedReader br = new BufferedReader(new InputStreamReader(fr));
+		String line = br.readLine();
+		while (line != null) {
+			String[] fields = line.stripLeading().split("\\s+");
+			//System.out.println("el fields0 es "+fields[0]+" y el genomeID es "+genomeID);
+			if (fields[0].equals(genomeID)) {
+				//System.out.println("tamaño es"+fields[1]);
+				genomeSize = Long.parseLong(fields[1]);
+				break;
+			}
+	        line = br.readLine(); 
+		}
+		
+	}
+    
 	public static void main(String[] args) throws IOException{
 		String fileName = args[0];
+		String sizesFile = args[1];
 		loadFile(fileName);
+		geneSize(sizesFile,fileName);
 		mergeIntervals();
+		System.out.println("Genome Size (bp): "+Long.toString(genomeSize));
 		System.out.println("Total Positions (bp): "+Integer.toString(totalMatchSize)+"\n");
 		getGrossCounts();
 		getFamilyCounts();
